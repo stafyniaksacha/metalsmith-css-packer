@@ -1,0 +1,34 @@
+{
+  "name": "metalsmith-css-packer",
+  "version": "0.1.0",
+  "description": "CSS packer/minifier/optimizer for metalsmith",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stafyniaksacha/metalsmith-css-packer.git"
+  },
+  "keywords": [
+    "metalsmith",
+    "stylesheets",
+    "css",
+    "packer",
+    "minifier",
+    "optimizer"
+  ],
+  "author": "Sacha STAFYNIAK <sacha.st@live.fr>",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/stafyniaksacha/metalsmith-css-packer/issues"
+  },
+  "homepage": "https://github.com/stafyniaksacha/metalsmith-css-packer#readme",
+  "dependencies": {
+    "bluebird": "^3.5.0",
+    "cheerio": "^0.22.0",
+    "csso": "^3.1.1",
+    "request": "^2.81.0",
+    "request-promise": "^4.2.1"
+  }
+}
