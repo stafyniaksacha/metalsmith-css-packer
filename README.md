@@ -129,8 +129,9 @@ To blacklist element from packing, simply add `data-packer="exclude"` attribute 
 | --- | --- | --- |
 | `inline` | `false` | if `true`, write packed content in a inline style tag instead of a local linked stylesheets |
 | `siteRootPath` | `/` | Use if your site root path is not `/` |
-| `ouputPath` | `assets/stylesheets/` | Customize output location of packed stylesheets |
+| `outputPath` | `assets/stylesheets/` | Customize output location of packed stylesheets |
 | `csso` | `true` | Enable/disable css optimizer |
 | `cssoOptions` | `{}` | Options passed to [csso](https://www.npmjs.com/package/csso#minifysource-options) |
+| `removeLocalSrc ` | `false` | If set to `true` local source files are not copied in build directory |
 
 > hint: metalsmith-css-packer use debug

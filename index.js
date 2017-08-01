@@ -15,10 +15,11 @@ module.exports = options => {
 
   let inline = options.inline || false;
   let siteRootPath = options.siteRootPath || '/';
-  let ouputPath = options.ouputPath || 'assets/stylesheets/';
+  let outputPath = options.outputPath || 'assets/stylesheets/';
   let cssoEnabled = options.csso || true;
   let cssoOptions = options.cssoOptions || {};
   let defaultMedia = options.defaultMedia || 'screen';
+  let removeLocalSrc = options.removeLocalSrc || false;
 
   return (files, metalsmith, done) => {
     let styles = {};
@@ -110,12 +111,14 @@ module.exports = options => {
                 }
 
                 styles[media][styleHash] = files[href.substring(1)].contents.toString();
+
+                if (removeLocalSrc) {
+                  delete files[href.substring(1)];
+                }
               }
               else {
-                  styles[media][styleHash] = fs.readFileSync(stylePath, "utf8");
+                styles[media][styleHash] = fs.readFileSync(stylePath, "utf8");
               }
-
-              return;
             }
 
             pageStyles[media].push(styleHash);
@@ -205,7 +208,7 @@ module.exports = options => {
 
           // include style reference only when inline mode is disabled
           if (!inline) {
-            $('<link>').attr('media', media).attr('rel', 'stylesheet').attr('href', siteRootPath + ouputPath + pageStylesHash + '.min.css').appendTo('head');
+            $('<link>').attr('media', media).attr('rel', 'stylesheet').attr('href', siteRootPath + outputPath + pageStylesHash + '.min.css').appendTo('head');
           }
         }
       }
@@ -237,9 +240,9 @@ module.exports = options => {
           // include style reference only when inline mode is enabled
           // else, add new packed file to metalsmith file list
           if (!inline) {
-            debug(`write packed stylesheet "${pageStylesHash}" in "${ouputPath + pageStylesHash + '.min.css'}" file`);
+            debug(`write packed stylesheet "${pageStylesHash}" in "${outputPath + pageStylesHash + '.min.css'}" file`);
 
-            files[ouputPath + pageStylesHash + '.min.css'] = {
+            files[outputPath + pageStylesHash + '.min.css'] = {
               contents: Buffer.from(packedStyle, 'utf-8')
             }
           }
