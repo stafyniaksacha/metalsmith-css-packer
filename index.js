@@ -6,6 +6,7 @@ const fs = require('fs');
 const path = require('path');
 const csso = require('csso');
 const rp = require('request-promise');
+const multimatch = require('multimatch');
 
 
 module.exports = options => {
@@ -20,6 +21,7 @@ module.exports = options => {
   let cssoOptions = options.cssoOptions || {};
   let defaultMedia = options.defaultMedia || 'screen';
   let removeLocalSrc = options.removeLocalSrc || false;
+  let exclude = options.exclude || [];
 
   return (files, metalsmith, done) => {
     let styles = {};
@@ -30,6 +32,11 @@ module.exports = options => {
     for (let file in files) {
       // parse only builded html files
       if (!file.endsWith('.html')) {
+        continue;
+      }
+
+      if (multimatch([file], exclude).length > 0) {
+        debug(`skipping excluded file ${file}`);
         continue;
       }
 
