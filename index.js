@@ -171,7 +171,6 @@ module.exports = options => {
             debug(`+-->  processing inline stylesheet identified by "${styleHash}"`);
 
             styles[media][styleHash] = $element.html();
-            return;
           }
 
           pageStyles[media].push(styleHash);
