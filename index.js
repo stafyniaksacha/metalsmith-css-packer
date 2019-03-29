@@ -1,5 +1,5 @@
 const debug = require('debug')('metalsmith-css-packer')
-const Bluebird  = require('bluebird');
+const Bluebird = require('bluebird');
 const cheerio = require('cheerio');
 const crypto = require('crypto');
 const fs = require('fs');
@@ -20,6 +20,7 @@ module.exports = options => {
   let cssoOptions = options.cssoOptions || {};
   let defaultMedia = options.defaultMedia || 'screen';
   let removeLocalSrc = options.removeLocalSrc || false;
+  let assetsSource = options.assetsSource || false;
   let hashContent = options.hashContent || false;
 
   return (files, metalsmith, done) => {
@@ -103,7 +104,7 @@ module.exports = options => {
               debug(`+-->  processing local stylesheet located at "${href}"`);
 
               // TODO: check with generated css with sass / less
-              let stylePath = path.join(metalsmith._directory, metalsmith._source, href)
+              let stylePath = path.join(metalsmith._directory, assetsSource ? assetsSource : metalsmith._source, href)
 
               if (files[href.substring(1)] === undefined) {
                 if (!fs.existsSync(stylePath)) {
@@ -175,6 +176,7 @@ module.exports = options => {
             debug(`+-->  processing inline stylesheet identified by "${styleHash}"`);
 
             styles[media][styleHash] = $element.html();
+            return;
           }
 
           pageStyles[media].push(styleHash);
@@ -222,7 +224,7 @@ module.exports = options => {
     // we can pack all styles togethers once all pending remotes styles are fetched
     Bluebird.all(remoteStylesPromises)
       .then(() => {
-        for(let pageStylesHash in packedStyles) {
+        for (let pageStylesHash in packedStyles) {
           debug(`create packed stylesheet "${pageStylesHash}", used by ${packedStylesUsage[pageStylesHash].length} files`);
 
           let packedStyle = '';

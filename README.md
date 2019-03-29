@@ -133,6 +133,7 @@ To blacklist element from packing, simply add `data-packer="exclude"` attribute 
 | `csso` | `true` | Enable/disable css optimizer |
 | `cssoOptions` | `{}` | Options passed to [csso](https://www.npmjs.com/package/csso#minifysource-options) |
 | `removeLocalSrc ` | `false` | If set to `true` local source files are not copied in build directory |
+| `assetsSource ` | `source` from metalsmith config | Where to find your css files - this comes before the css file paths that are set in your .html file. If not set, it goes with default metalsmith source path `metalsmith._source`|
 | `hashContent` | `false` | If set to `false`, output file name are a hash of all input style names. If set to `true`, output file names are a hash of the resulting style contents. Useful for serving stylesheets with an efficient cache policy. |
 
 > hint: metalsmith-css-packer use debug
