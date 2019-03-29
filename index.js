@@ -21,7 +21,7 @@ module.exports = options => {
   let defaultMedia = options.defaultMedia || 'screen';
   let removeLocalSrc = options.removeLocalSrc || false;
   let assetsSource = options.assetsSource || false;
-
+  let hashContent = options.hashContent || false;
 
   return (files, metalsmith, done) => {
     let styles = {};
@@ -106,20 +106,23 @@ module.exports = options => {
               // TODO: check with generated css with sass / less
               let stylePath = path.join(metalsmith._directory, assetsSource ? assetsSource : metalsmith._source, href)
 
-              if (!fs.existsSync(stylePath)) {
-                if (files[href.substring(1)] === undefined) {
+              if (files[href.substring(1)] === undefined) {
+                if (!fs.existsSync(stylePath)) {
                   console.warn(`File missing: ${stylePath}`);
                   return;
                 }
-
-                styles[media][styleHash] = files[href.substring(1)].contents.toString();
-
-                if (removeLocalSrc) {
-                  delete files[href.substring(1)];
+                else {
+                  debug(`+---->  reading ${stylePath} from filesystem`);
+                  styles[media][styleHash] = fs.readFileSync(stylePath, "utf8");
                 }
               }
               else {
-                styles[media][styleHash] = fs.readFileSync(stylePath, "utf8");
+                styles[media][styleHash] = files[href.substring(1)].contents.toString();
+
+                if (removeLocalSrc) {
+                  debug(`+---->  removing local stylesheet file ${href.substring(1)}`);
+                  delete files[href.substring(1)];
+                }
               }
             }
 
@@ -207,11 +210,6 @@ module.exports = options => {
           packedStylesUsage[pageStylesHash].push(file);
 
           debug(`register usage of packed style "${pageStylesHash}" (media: "${media}") for file "${file}"`);
-
-          // include style reference only when inline mode is disabled
-          if (!inline) {
-            $('<link>').attr('media', media).attr('rel', 'stylesheet').attr('href', siteRootPath + outputPath + pageStylesHash + '.min.css').appendTo('head');
-          }
         }
       }
 
@@ -239,13 +237,32 @@ module.exports = options => {
             packedStyle = csso.minify(packedStyle, cssoOptions).css;
           }
 
-          // include style reference only when inline mode is enabled
-          // else, add new packed file to metalsmith file list
-          if (!inline) {
-            debug(`write packed stylesheet "${pageStylesHash}" in "${outputPath + pageStylesHash + '.min.css'}" file`);
+          let finalHash;
+          if (hashContent) {
+            finalHash = crypto.createHash('sha1').update(packedStyle).digest('hex');
+            debug(`mapping hash "${pageStylesHash}" to content hash "${finalHash}"`);
+          } else {
+            finalHash = pageStylesHash;
+          }
 
-            files[outputPath + pageStylesHash + '.min.css'] = {
+          // include style reference only when inline mode is enabled
+          // else, add new packed file to metalsmith file list and
+          // link it
+          if (!inline) {
+            debug(`write packed stylesheet "${pageStylesHash}" in "${outputPath + finalHash + '.min.css'}" file`);
+
+            files[outputPath + finalHash + '.min.css'] = {
               contents: Buffer.from(packedStyle, 'utf-8')
+            };
+
+            for (let file of packedStylesUsage[pageStylesHash]) {
+              debug(`link packed stylesheet "${finalHash}" in "${file}" file`);
+
+              let $ = cheerio.load(files[file].contents.toString());
+
+              $('<link>').attr('media', packedStyles[pageStylesHash].media).attr('rel', 'stylesheet').attr('href', siteRootPath + outputPath + finalHash + '.min.css').appendTo('head');
+
+              files[file].contents = Buffer.from($.html(), 'utf-8');
             }
           }
           else {
