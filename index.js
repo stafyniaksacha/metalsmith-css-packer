@@ -105,20 +105,23 @@ module.exports = options => {
               // TODO: check with generated css with sass / less
               let stylePath = path.join(metalsmith._directory, metalsmith._source, href)
 
-              if (!fs.existsSync(stylePath)) {
-                if (files[href.substring(1)] === undefined) {
+              if (files[href.substring(1)] === undefined) {
+                if (!fs.existsSync(stylePath)) {
                   console.warn(`File missing: ${stylePath}`);
                   return;
                 }
-
-                styles[media][styleHash] = files[href.substring(1)].contents.toString();
-
-                if (removeLocalSrc) {
-                  delete files[href.substring(1)];
+                else {
+                  debug(`+---->  reading ${stylePath} from filesystem`);
+                  styles[media][styleHash] = fs.readFileSync(stylePath, "utf8");
                 }
               }
               else {
-                styles[media][styleHash] = fs.readFileSync(stylePath, "utf8");
+                styles[media][styleHash] = files[href.substring(1)].contents.toString();
+
+                if (removeLocalSrc) {
+                  debug(`+---->  removing local stylesheet file ${href.substring(1)}`);
+                  delete files[href.substring(1)];
+                }
               }
             }
 
