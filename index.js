@@ -1,3 +1,4 @@
+// @ts-check
 const debug = require('debug')('metalsmith-css-packer')
 const Bluebird = require('bluebird');
 const cheerio = require('cheerio');
@@ -259,8 +260,9 @@ module.exports = options => {
               debug(`link packed stylesheet "${finalHash}" in "${file}" file`);
 
               let $ = cheerio.load(files[file].contents.toString());
+              let $head = $('head').first();
 
-              $('<link>').attr('media', packedStyles[pageStylesHash].media).attr('rel', 'stylesheet').attr('href', siteRootPath + outputPath + finalHash + '.min.css').appendTo('head');
+              $('<link>').attr('media', packedStyles[pageStylesHash].media).attr('rel', 'stylesheet').attr('href', siteRootPath + outputPath + finalHash + '.min.css').appendTo($head);
 
               files[file].contents = Buffer.from($.html(), 'utf-8');
             }
@@ -270,8 +272,9 @@ module.exports = options => {
               debug(`include packed stylesheet "${pageStylesHash}" in "${file}" file`);
 
               let $ = cheerio.load(files[file].contents.toString());
+              let $head = $('head').first();
 
-              $('<style>').attr('media', packedStyles[pageStylesHash].media).html(packedStyle).appendTo('head');
+              $('<style>').attr('media', packedStyles[pageStylesHash].media).html(packedStyle).appendTo($head);
 
               files[file].contents = Buffer.from($.html(), 'utf-8');
             }
